@@ -504,7 +504,8 @@ void Hist1D::Print(double luminosity,
       ? "plots/"+subdir+"/"+Name()
       : "plots/"+Name();
     for(const auto &ext: this_opt_.FileExtensions()){
-      string full_name = base_name+"__"+this_opt_.TypeString()+'.'+ext;
+      // string full_name = base_name+"__"+this_opt_.TypeString()+'.'+ext;
+      string full_name = base_name+'.'+ext;
       if (Contains(tag_,"FixName:")){
         string tagName=tag_;
         ReplaceAll(tagName, "FixName:", "");
@@ -561,9 +562,14 @@ string Hist1D::Name() const{
   }else if (Contains(tag_,"ShortName:")){
     string tagName=tag_;
     ReplaceAll(tagName, "ShortName:", "");
-    return CodeToPlainText(tagName+"__"+xaxis_.var_.Name()+weight);
+    // return CodeToPlainText(tagName+"__"+xaxis_.var_.Name()+weight);
+    return CodeToPlainText(tagName);
   }else{
-    return CodeToPlainText(tag_+"__"+xaxis_.var_.Name()+cut+weight);
+    if (Contains(tag_,"/")) {
+      string token = tag_.substr(0, tag_.find("/"));
+      mkdir(("plots/"+token).c_str(), 0777);
+    }
+    return tag_;
   }
 }
 
@@ -989,7 +995,7 @@ void Hist1D::FixYAxis(vector<TH1D> &bottom_plots) const{
   }else{
     double the_max = GetMaxDraw()*GetLegendRatio();
     int digits = fabs(floor(log10(the_max))-1)+2;
-    digits = max(2, min(6, digits));//For huge axis scale, reverts to scientific notation
+    digits = max(2, min(5, digits));//For huge axis scale, reverts to scientific notation
 
     //Scale offset by good empirical numbers
     offset = 0.6+0.25*digits;

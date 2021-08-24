@@ -45,55 +45,6 @@ namespace Functions{
     return static_cast<float>(1);
   });
   
-  const NamedFunc lowDphiFix("lowDphiFix",[](const Baby &b) -> NamedFunc::ScalarType{
-    bool lowDphi(false);
-    for (unsigned i(0); i<b.jet_pt()->size(); i++){
-      if (i>3) break;
-      if (i<=1 && b.jet_met_dphi()->at(i)<=0.5) lowDphi = true;
-      else if (i>=2 && b.jet_met_dphi()->at(i)<=0.3) lowDphi = true;
-    }
-    return lowDphi;
-  });
-
-  const NamedFunc boostedRegionIdx("boostedRegionIdx",[](const Baby &b) -> NamedFunc::ScalarType{
-    float bb_wp = 0.7;
-    if (b.met()<=300) bb_wp = 0.86;
-    // 0 = D, 1 = B1, 2 = B2, 3 = C, 4 = A1, 5 = A2
-    bool j1mass = b.fjet_msoftdrop()->at(0)>95 && b.fjet_msoftdrop()->at(0)<=145;
-    bool j2mass = b.fjet_msoftdrop()->at(1)>95 && b.fjet_msoftdrop()->at(1)<=145;
-    bool j1bb = b.fjet_deep_md_hbb_btv()->at(0)>bb_wp;
-    bool j2bb = b.fjet_deep_md_hbb_btv()->at(1)>bb_wp;
-
-    if (j1mass && j2mass) {
-      if (j1bb && j2bb) return 5; 
-      else if (j1bb || j2bb) return 4; 
-      else return 3;
-    } else { 
-      if (j1bb && j2bb) return 2;
-      else if (j1bb || j2bb) return 1;
-      else return 0;
-    }
-  });
-
-  const NamedFunc amBoostedRegionIdx("amBoostedRegionIdx",[](const Baby &b) -> NamedFunc::ScalarType{
-    float bb_wp = 0.7;
-    if (b.met()<=300) bb_wp = 0.86;
-    // 0 = D, 1 = B1, 2 = B2, 3 = C, 4 = A1, 5 = A2
-    float am = (b.fjet_msoftdrop()->at(0)+b.fjet_msoftdrop()->at(1))/2;
-    bool j1bb = b.fjet_deep_md_hbb_btv()->at(0)>bb_wp;
-    bool j2bb = b.fjet_deep_md_hbb_btv()->at(1)>bb_wp;
-
-    if (am>95 && am<=145) {
-      if (j1bb && j2bb) return 5; 
-      else if (j1bb || j2bb) return 4; 
-      else return 3;
-    } else { 
-      if (j1bb && j2bb) return 2;
-      else if (j1bb || j2bb) return 1;
-      else return 0;
-    }
-  });
-
   const NamedFunc ntrub("ntrub",[](const Baby &b) -> NamedFunc::ScalarType{
     int tmp_ntrub(0);
     for (unsigned i(0); i<b.jet_pt()->size(); i++){

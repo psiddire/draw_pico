@@ -181,13 +181,7 @@ void FunctionParser::ResolveVariables() const{
     if(token.type_ == Token::Type::variable_name){
       // if(Functions::func_map.find(token.string_rep_) != Functions::func_map.end()){
       // 	token = Functions::func_map.at(token.string_rep_);
-      if(token.string_rep_ == "lowDphiFix"){
-        token = Functions::lowDphiFix;
-      } else if(token.string_rep_ == "boostedRegionIdx"){
-        token = Functions::boostedRegionIdx;
-      } else if(token.string_rep_ == "amBoostedRegionIdx"){
-        token = Functions::amBoostedRegionIdx;
-      } else if(token.string_rep_ == "SampleType"){
+      if(token.string_rep_ == "SampleType"){
         token = Functions::SampleType;
       } else if(token.string_rep_ == "boostSignalRegion"){
         token = Functions::boostSignalRegion;
