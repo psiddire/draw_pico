@@ -4,8 +4,6 @@ int lumiblock
 Long64_t event
 int type
 bool stitch
-bool stitch_ht
-bool stitch_htmet
 bool stitch_photon
 bool stitch_dy
 
@@ -14,19 +12,12 @@ int npv
 int npv_good
 int npu_tru
 int npu_tru_mean
-float ht
-float ht5
 float mht
 float mht_phi
 float met
 float met_phi
-float met_calo
 float met_tru
 float met_tru_phi
-float mt
-float mt_tru
-float ht_isr_me
-float vbf_mva
 
 ###################   Zgamma   ##################
 float dijet_pt
@@ -70,8 +61,6 @@ std::vector<float> jet_breg_corr
 std::vector<float> jet_breg_res
 std::vector<float> jet_deepcsv
 std::vector<float> jet_deepflav
-std::vector<int>   jet_puid
-std::vector<float> jet_puid_disc
 std::vector<float> jet_ne_emef
 std::vector<float> jet_qgl
 std::vector<bool>  jet_islep
@@ -81,15 +70,6 @@ std::vector<bool>  jet_isgood
 std::vector<bool>  jet_id
 std::vector<int>   jet_hflavor
 std::vector<int>   jet_pflavor
-std::vector<bool>  jet_h1d
-std::vector<bool>  jet_h2d
-std::vector<int>   jet_fjet_idx
-
-###################   ISR related   ##################
-float jetsys_pt
-float jetsys_eta
-float jetsys_phi
-float jetsys_m
 
 ##################   Leptons   ################
 int nlep
@@ -104,6 +84,7 @@ int nvmu
 std::vector<float> mu_pt
 std::vector<float> mu_eta
 std::vector<float> mu_phi
+std::vector<float> mu_ptErr
 std::vector<float> mu_miniso
 std::vector<float> mu_reliso
 std::vector<float> mu_dz
@@ -125,6 +106,7 @@ std::vector<float> el_pt
 std::vector<float> el_eta
 std::vector<float> el_etasc
 std::vector<float> el_phi
+std::vector<float> el_energyErr
 std::vector<float> el_miniso
 std::vector<float> el_reliso
 std::vector<float> el_dz
@@ -132,7 +114,9 @@ std::vector<float> el_dxy
 std::vector<float> el_ip3d
 std::vector<float> el_sip3d
 std::vector<float> el_idmva
-std::vector<bool>  el_id
+std::vector<bool>  el_id80
+std::vector<bool>  el_id90
+std::vector<bool>  el_idLoose
 std::vector<bool>  el_sig
 std::vector<bool>  el_ispf
 std::vector<int>   el_charge
@@ -178,7 +162,6 @@ std::vector<int>   fsrphoton_muonidx
 
 ###################   Tracks    ##################
 int ntk
-
 std::vector<float> tk_pt
 std::vector<float> tk_eta
 std::vector<float> tk_phi
@@ -190,7 +173,6 @@ std::vector<float> tk_reliso_chg
 std::vector<float> tk_mt
 std::vector<bool>  tk_nano_electron
 std::vector<bool>  tk_nano_muon
-
 
 ###################   Quality   ##################
 bool pass_goodv
@@ -227,11 +209,11 @@ int ntrutaul
 float weight
 float w_lumi
 float w_photon
+float w_lep
 float w_pu
 float w_prefire
 
-################  Triggers copy straight from Nano, same names   ##################
-
+################  Triggers   ##################
 bool HLT_Mu17_Photon30_IsoCaloId
 bool HLT_Ele23_CaloIdM_TrackIdM_PFJet30
 bool HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30
@@ -243,12 +225,74 @@ bool HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ
 bool HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
 bool HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 bool HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
-bool HLT_Photon175
 
-################  Systematic variations  - to be implemented as needed  ##################
+################  L1 Trigger ##################
+bool L1_SingleEG10
+bool L1_SingleEG15
+bool L1_SingleEG18
+bool L1_SingleEG24
+bool L1_SingleEG26
+bool L1_SingleEG28
+bool L1_SingleEG30
+bool L1_SingleEG32
+bool L1_SingleEG34
+bool L1_SingleEG34er2p1
+bool L1_SingleEG36
+bool L1_SingleEG36er2p1
+bool L1_SingleEG38
+bool L1_SingleEG38er2p1
+bool L1_SingleEG40
+bool L1_SingleEG42
+bool L1_SingleEG45
+bool L1_SingleEG50
+bool L1_SingleIsoEG18
+bool L1_SingleIsoEG18er2p1
+bool L1_SingleIsoEG20
+bool L1_SingleIsoEG20er2p1
+bool L1_SingleIsoEG22
+bool L1_SingleIsoEG22er2p1
+bool L1_SingleIsoEG24
+bool L1_SingleIsoEG24er2p1
+bool L1_SingleIsoEG26
+bool L1_SingleIsoEG26er2p1
+bool L1_SingleIsoEG28
+bool L1_SingleIsoEG28er2p1
+bool L1_SingleIsoEG30
+bool L1_SingleIsoEG30er2p1
+bool L1_SingleIsoEG32
+bool L1_SingleIsoEG32er2p1
+bool L1_SingleIsoEG33er2p1
+bool L1_SingleIsoEG34
+bool L1_SingleIsoEG34er2p1
+bool L1_SingleIsoEG35
+bool L1_SingleIsoEG35er2p1
+bool L1_SingleIsoEG36
+bool L1_SingleIsoEG36er2p1
+bool L1_SingleIsoEG37
+bool L1_SingleIsoEG38
+bool L1_SingleIsoEG38er2p1
+bool L1_SingleIsoEG40
+bool L1_SingleIsoEG40er2p1
+bool L1_DoubleEG_15_10
+bool L1_DoubleEG_18_17
+bool L1_DoubleEG_20_18
+bool L1_DoubleEG_22_10
+bool L1_DoubleEG_22_12
+bool L1_DoubleEG_22_15
+bool L1_DoubleEG_23_10
+bool L1_DoubleEG_24_17
+bool L1_DoubleEG_25_12
+bool L1_DoubleEG_25_13
+bool L1_DoubleEG_25_14
+bool L1_DoubleEG_LooseIso23_10
+bool L1_DoubleEG_LooseIso24_10
+bool L1_DoubleMu_12_5
+bool L1_DoubleMu_15_7
 
+################  Systematic variations  ##################
 # +/- variations are index 0 and 1
 std::vector<float> sys_photon
+std::vector<float> sys_lep
 std::vector<float> sys_pu
 std::vector<float> sys_prefire
 std::vector<float> sys_murf

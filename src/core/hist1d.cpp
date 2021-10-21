@@ -309,7 +309,7 @@ Hist1D::Hist1D(const Axis &xaxis, const NamedFunc &cut,
   if(xaxis_.units_ != "") x_title += " ["+xaxis_.units_+"]";
 
   TH1D empty("", (";"+x_title+";").c_str(), xaxis_.Nbins(), &xaxis_.Bins().at(0));
-  empty.SetStats(false);
+  empty.SetStats(true);
   empty.Sumw2(true);
   for(const auto &process: processes){
     unique_ptr<SingleHist1D> hist(new SingleHist1D(*this, process, empty));
@@ -665,7 +665,7 @@ void Hist1D::InitializeHistos() const{
 }
 
 /*!\brief Moves overflow (underflow) contents into last (first) visible bin
- */
+s */
 void Hist1D::MergeOverflow() const{
   bool underflow = false, overflow = false;
   switch(this_opt_.Overflow()){
@@ -995,7 +995,7 @@ void Hist1D::FixYAxis(vector<TH1D> &bottom_plots) const{
   }else{
     double the_max = GetMaxDraw()*GetLegendRatio();
     int digits = fabs(floor(log10(the_max))-1)+2;
-    digits = max(2, min(5, digits));//For huge axis scale, reverts to scientific notation
+    digits = max(2, min(6, digits));//For huge axis scale, reverts to scientific notation
 
     //Scale offset by good empirical numbers
     offset = 0.6+0.25*digits;
@@ -1084,7 +1084,7 @@ vector<shared_ptr<TLatex> > Hist1D::GetTitleTexts() const{
     if(this_opt_.Stack() != StackType::shapes) {
       if (luminosity_tag_ != "") oss << luminosity_tag_ << " fb^{-1} (13 TeV)" << flush;
       else if (luminosity_<1.1) oss << "137 fb^{-1} (13 TeV)" << setprecision(1) << flush;
-      else oss << setprecision(1) << luminosity_ << " fb^{-1} (13 TeV)" << flush;
+      else oss << setprecision(3) << luminosity_ << " fb^{-1} (13 TeV)" << flush;
     } else oss << "13 TeV" << flush;
     out.push_back(make_shared<TLatex>(right, bottom+0.2*(top-bottom),
                                       oss.str().c_str()));
@@ -1521,8 +1521,8 @@ vector<shared_ptr<TLegend> > Hist1D::GetLegends(){
   if(this_opt_.DisplayLumiEntry()){
     auto &leg = legends.at(GetLegendIndex(entries_added, n_entries, legends.size()));
     ostringstream label;
-    if (luminosity_tag_ != "") label << fixed  << "L=" << setprecision(1) << luminosity_tag_ << " fb^{-1}";
-    else if(luminosity_ != 1.0) label << fixed  << "L=" << setprecision(1) << luminosity_ << " fb^{-1}";
+    if (luminosity_tag_ != "") label << fixed  << "L=" << setprecision(3) << luminosity_tag_ << " fb^{-1}";
+    else if(luminosity_ != 1.0) label << fixed  << "L=" << setprecision(3) << luminosity_ << " fb^{-1}";
     else label << fixed << setprecision(1) << "L=137 fb^{-1}";
     //else label << fixed << setprecision(1) << "L=" << 36.8 << " fb^{-1}";
     if(this_opt_.Stack() == StackType::data_norm && datas_.size() > 0){

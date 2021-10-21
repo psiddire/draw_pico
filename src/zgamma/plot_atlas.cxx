@@ -133,7 +133,7 @@ int main() {
     vector<bool> bline = {b.photon_pt()->at(0)/b.llphoton_m()->at(0) > 0.12,
                           b.ll_m()->at(0) > 81.2 && b.ll_m()->at(0) < 101.2,
                           b.photon_drmin()->at(0) > 0.3};
-//                           b.llphoton_m()->at(0) > 105 && b.llphoton_m()->at(0) < 160};
+    //                           b.llphoton_m()->at(0) > 105 && b.llphoton_m()->at(0) < 160};
     for(size_t i = 0; i < bline.size(); i++)
       base = base && bline.at(i);
     return base;
@@ -146,20 +146,20 @@ int main() {
     bool mu = b.ll_lepid()->at(0) == 13 && b.mu_pt()->at(b.ll_i1()->at(0)) > 26 && b.mu_pt()->at(b.ll_i2()->at(0)) > 8;
     return mu;
   });
-  NamedFunc vbf("VBF cut",[](const Baby &b) -> NamedFunc::ScalarType{
-    return b.vbf_mva() > -0.99;
-  });
+  // NamedFunc vbf("VBF cut",[](const Baby &b) -> NamedFunc::ScalarType{
+  //   return false; // b.vbf_mva() > -0.99;
+  // });
   NamedFunc leps("e-or-#mu",[](const Baby &b) -> NamedFunc::ScalarType{
     bool e =  b.ll_lepid()->at(0) == 11 && b.el_pt()->at(b.ll_i1()->at(0)) > 26 && b.el_pt()->at(b.ll_i2()->at(0)) > 17;
     bool mu = b.ll_lepid()->at(0) == 13 && b.mu_pt()->at(b.ll_i1()->at(0)) > 26 && b.mu_pt()->at(b.ll_i2()->at(0)) > 8;
     return e || mu;
   });
-  vector<NamedFunc> cat = { baseline && vbf && leps,
-                            baseline && relpT > 0.4 && leps && !vbf               ,
-                            baseline &&   pTt > 40  &&  els && !vbf && relpT < 0.4,
-                            baseline &&   pTt < 40  &&  els && !vbf && relpT < 0.4,
-                            baseline &&   pTt > 40  &&  mus && !vbf && relpT < 0.4,
-                            baseline &&   pTt < 40  &&  mus && !vbf && relpT < 0.4};
+  vector<NamedFunc> cat = { baseline && leps, // vbf
+                            baseline && relpT > 0.4 && leps               , // !vbf
+                            baseline &&   pTt > 40  &&  els && relpT < 0.4, // !vbf
+                            baseline &&   pTt < 40  &&  els && relpT < 0.4, // !vbf
+                            baseline &&   pTt > 40  &&  mus && relpT < 0.4, // !vbf
+                            baseline &&   pTt < 40  &&  mus && relpT < 0.4}; // !vbf
   NamedFunc wgt("w_lumi",[](const Baby &b) -> NamedFunc::ScalarType{ 
     double weight = b.w_lumi();
     if(b.type() >= 200000 && b.type() <= 205000)

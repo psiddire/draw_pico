@@ -26,16 +26,12 @@ using namespace ZgUtilities;
 int main() {
   gErrorIgnoreLevel = 6000;
   Palette colors("txt/colors.txt","default");
-  Process::Type back = Process::Type::background;
   Process::Type sig  = Process::Type::signal;
-  Process::Type data = Process::Type::data;
-  string bfolder("/net/cms17/cms17r0/pico/NanoAODv2/zgamma_mc_ul/2017/");
-  string mc_path(bfolder+"mc/merged_zgmc_llg/");
-  string sig_path(bfolder+"../../zgamma_signal_ul/2017/signal/merged_zgmc_llg/");
-  string data_path(bfolder+"../../zgamma_data/2017/data/merged_zgmc_llg/");
+  string bfolder("/net/cms17/cms17r0/pico/");
+  string ul_path(bfolder+"NanoAODv2/zgamma_signal_ul/2017/signal/merged_zgmc_llg/");
+  string rereco_path(bfolder+"NanoAODv7/zgamma_signal/2017/signal/merged_zgmc_llg/");
 
-  NamedFunc costheta(         "costheta", [](const Baby &b) -> NamedFunc::ScalarType{ return cos_theta(b); });
-  NamedFunc bigTheta(         "bigTheta", [](const Baby &b) -> NamedFunc::ScalarType{ return cos_Theta(b); });
+  NamedFunc nllphoton(       "nllphoton", [](const Baby &b) -> NamedFunc::ScalarType{ return b.nllphoton(); });
   NamedFunc llg_costheta( "llg_costheta", [](const Baby &b) -> NamedFunc::ScalarType{ return b.llphoton_costheta()->at(0); });
   NamedFunc llg_bigTheta( "llg_bigTheta", [](const Baby &b) -> NamedFunc::ScalarType{ return b.llphoton_cosTheta()->at(0); });
   NamedFunc phi(                   "phi", [](const Baby &b) -> NamedFunc::ScalarType{ return Getphi(b); });
@@ -45,7 +41,7 @@ int main() {
   NamedFunc p_pte(          "photon_pte", [](const Baby &b) -> NamedFunc::ScalarType{ return b.photon_pterr()->at(0)/b.photon_pt()->at(0); });
   NamedFunc p_eb(            "photon_EB", [](const Baby &b) -> NamedFunc::ScalarType{ return abs(b.photon_eta()->at(0)) < 1.4442; });
   NamedFunc p_ee(            "photon_EE", [](const Baby &b) -> NamedFunc::ScalarType{ return abs(b.photon_eta()->at(0)) > 1.566; });
-  NamedFunc g_drmax(      "photon_drmax", [](const Baby &b) -> NamedFunc::ScalarType{
+  NamedFunc g_drmax(      "photon_drmax", [](const Baby &b) -> NamedFunc::ScalarType{ 
     TVector3 photon = AssignGamma(b).Vect();
     TVector3 l1     = AssignL1(b).Vect();
     TVector3 l2     = AssignL2(b).Vect();
@@ -63,12 +59,12 @@ int main() {
       j2.SetPtEtaPhi(b.jet_pt()->at(i2),b.jet_eta()->at(i2),b.jet_phi()->at(i2));
       return (z+g+j1+j2).Pt()/(z.Pt()+g.Pt()+j1.Pt()+j2.Pt());
     });
-  NamedFunc jjllg_dphi("jjllg_dphi",[](const Baby &b) -> NamedFunc::ScalarType{
+  NamedFunc jjllg_dphi("jjllg_dphi",[](const Baby &b) -> NamedFunc::ScalarType{ 
     TVector3 h = AssignH(b).Vect();
     TVector3 jj;
     TVector3 j1, j2;
     int i1(-1), i2(-1);
-    for(size_t ij(0); ij < b.jet_pt()->size(); ij++)
+    for(size_t ij(0); ij < b.jet_pt()->size(); ij++) 
       if(b.jet_isgood()->at(ij) && i1 == -1) i1 = ij;
       else if(b.jet_isgood()->at(ij) && i2 == -1) i2 = ij;
     j1.SetPtEtaPhi(b.jet_pt()->at(i1),b.jet_eta()->at(i1),b.jet_phi()->at(i1));
@@ -76,20 +72,20 @@ int main() {
     jj = j1 + j2;
     return h.DeltaPhi(jj);
   });
-  NamedFunc photon_jdr("photon_jdr",[](const Baby &b) -> NamedFunc::ScalarType{
+  NamedFunc photon_jdr("photon_jdr",[](const Baby &b) -> NamedFunc::ScalarType{ 
     TVector3 g = AssignGamma(b).Vect();
     TVector3 j1, j2;
     int i1(-1), i2(-1);
-    for(size_t ij(0); ij < b.jet_pt()->size(); ij++)
+    for(size_t ij(0); ij < b.jet_pt()->size(); ij++) 
       if(b.jet_isgood()->at(ij) && i1 == -1) i1 = ij;
       else if(b.jet_isgood()->at(ij) && i2 == -1) i2 = ij;
     j1.SetPtEtaPhi(b.jet_pt()->at(i1),b.jet_eta()->at(i1),b.jet_phi()->at(i1));
     j2.SetPtEtaPhi(b.jet_pt()->at(i2),b.jet_eta()->at(i2),b.jet_phi()->at(i2));
     return min(g.DeltaR(j1),g.DeltaR(j2));
   });
-  NamedFunc photon_zep("photon_zep",[](const Baby &b) -> NamedFunc::ScalarType{
+  NamedFunc photon_zep("photon_zep",[](const Baby &b) -> NamedFunc::ScalarType{ 
     int i1(-1), i2(-1);
-    for(size_t ij(0); ij < b.jet_pt()->size(); ij++)
+    for(size_t ij(0); ij < b.jet_pt()->size(); ij++) 
       if(b.jet_isgood()->at(ij) && i1 == -1) i1 = ij;
       else if(b.jet_isgood()->at(ij) && i2 == -1) i2 = ij;
     return abs(b.photon_eta()->at(0) - (b.jet_eta()->at(i1)+b.jet_eta()->at(i2))/2);
@@ -100,7 +96,7 @@ int main() {
     TVector3 z = AssignZ(b).Vect();
     g.SetZ(0); h.SetZ(0); z.SetZ(0);
     return h.Cross(z-g).Mag()/h.Mag();
-  });
+  }); 
   NamedFunc jet1_pt("jet1_pt",[](const Baby &b) -> NamedFunc::ScalarType{
     int i1(-1);
     double pt(0);
@@ -124,30 +120,22 @@ int main() {
   });
   NamedFunc wgt("weight",[](const Baby &b) -> NamedFunc::ScalarType{
     double weight = b.w_lumi();
-    if(b.type() >= 1000) {
-      weight = weight*b.w_photon();
-      if(b.type() >= 200000 && b.type() <= 205000)
-	return weight*100;
-    }
-    return weight;
+    return weight*100;
   });
 
-  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
+  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
   NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
   NamedFunc trigs(el_trigs || mu_trigs);
+  NamedFunc mass_cuts("ll_m[0] > 50 && llphoton_m[0]+ll_m[0]>=185 && llphoton_m[0] > 100 && llphoton_m[0] < 180 && photon_pt[0]/llphoton_m[0] >= 15./110");
   NamedFunc baseline("nphoton > 0 && nll > 0");
-  vector<NamedFunc> lep = {"ll_lepid[0] == 11 && ll_dr[0] > 0.4 && "
-			   "el_pt[ll_i1[0]] > 25 && el_pt[ll_i2[0]] > 15 && "
-			   "el_id[ll_i1[0]] && el_id[ll_i2[0]] && "
-			   "el_reliso[ll_i1[0]] < 0.35 && el_reliso[ll_i2[0]] < 0.35 && "
-			   "el_sip3d[ll_i1[0]] < 4 && el_sip3d[ll_i2[0]] < 4",
-                           "ll_lepid[0] == 13 && ll_dr[0] > 0.4 && "
-			   "mu_pt[ll_i1[0]] > 20 && mu_pt[ll_i2[0]] > 10 && "
+  vector<NamedFunc> lep = {"ll_lepid[0] == 11 && el_pt[ll_i1[0]] > 25 && el_pt[ll_i2[0]] > 15 && "
+			   "el_sig[ll_i1[0]] && el_sig[ll_i2[0]]",
+                           "ll_lepid[0] == 13 && mu_pt[ll_i1[0]] > 20 && mu_pt[ll_i2[0]] > 10 && "
 			   "mu_sig[ll_i1[0]] && mu_sig[ll_i2[0]]"};
   NamedFunc pho("photon_pt[0] > 15 && photon_drmin[0] > 0.4 && photon_sig[0]");
-  // NamedFunc mass_cuts("ll_m[0] > 50 && llphoton_m[0]+ll_m[0]>=185 && llphoton_m[0] > 100 && llphoton_m[0] < 180 && photon_pt[0]/llphoton_m[0] >= 15./110");
-  // NamedFunc mass_cuts("llphoton_m[0]+ll_m[0]<185 || photon_pt[0]/llphoton_m[0]<15./110");
-  NamedFunc mass_cuts("llphoton_m[0]+ll_m[0]<185 && llphoton_m[0]>80 && llphoton_m[0]<100");
+
+  // NamedFunc fullsel_el("ll_lepid[llphoton_ill[j]] == 11 && el_pt[ll_i1[llphoton_ill[j]]] > 25 && el_pt[ll_i2[llphoton_ill[j]]] > 15 && llphoton_m[j]+ll_m[j]>=185 && llphoton_m[j] > 100 && llphoton_m[j] < 180 && photon_pt[llphoton_iph[j]]/llphoton_m[j] >= 15./110");
+  // NamedFunc fullsel_mu("ll_lepid[llphoton_ill[j]] == 13 && mu_pt[ll_i1[llphoton_ill[j]]] > 20 && mu_pt[ll_i2[llphoton_ill[j]]] > 10 && llphoton_m[j]+ll_m[j]>=185 && llphoton_m[j] > 100 && llphoton_m[j] < 180 && photon_pt[llphoton_iph[j]]/llphoton_m[j] >= 15./110");
 
   PlotOpt log_lumi("txt/plot_styles.txt","CMSPaper");
   log_lumi.Title(TitleType::info)
@@ -159,9 +147,8 @@ int main() {
           .UseCMYK(false)
           .LeftMargin(0.17)
           .LegendColumns(1)
-          .Bottom(BottomType::ratio)
-          .CanvasWidth(900)
-          .CanvasHeight(900)
+          .CanvasWidth(800)
+          .CanvasHeight(800)
           .FileExtensions({"pdf"});
 
   PlotOpt lin_lumi = log_lumi().YAxis(YAxisType::linear);
@@ -169,21 +156,15 @@ int main() {
   PlotOpt log_stack = log_lumi().Stack(StackType::signal_overlay);
   vector<PlotOpt> ops = {lin_stack};
 
-  auto proc_smzg = Process::MakeShared<Baby_pico>("SM Z#gamma",       back,
-	 	      TColor::GetColor("#16bac5"), {mc_path+"*ZGToLLG*"}, trigs);
-  auto proc_dy   = Process::MakeShared<Baby_pico>("DY",               back,
-		      TColor::GetColor("#ffb400"), {mc_path+"*DYJets*"},  trigs && "stitch_dy");
-  auto proc_hzg  = Process::MakeShared<Baby_pico>("HToZ#gamma(x100)", sig,
-                      TColor::GetColor("#ff0000"), {sig_path+"*.root"},   trigs);
-  auto proc_data = Process::MakeShared<Baby_pico>("Data",             data,
-                      kBlack,                      {data_path+"*.root"},  trigs);
+  auto proc_UL     = Process::MakeShared<Baby_pico>("HToZ#gamma (UL)", sig, 
+                      TColor::GetColor("#ff0000"), {ul_path+"*.root"}, trigs);
+  auto proc_Rereco = Process::MakeShared<Baby_pico>("HToZ#gamma (Rereco)", sig, 
+                      TColor::GetColor("#0000ff"), {rereco_path+"*.root"}, trigs);
 
-  proc_smzg->SetLineWidth(1);
-  proc_dy->SetLineWidth(1);
-  proc_hzg->SetLineWidth(3);
-  proc_data->SetMarkerSize(1);
+  proc_UL->SetLineWidth(3);
+  proc_Rereco->SetLineWidth(3);
 
-  vector<shared_ptr<Process>> procs = {proc_data, proc_dy, proc_smzg, proc_hzg};
+  vector<shared_ptr<Process>> procs = {proc_UL, proc_Rereco};
 
   PlotMaker pm;
   string lepName[2] = {"el/", "mu/"};
@@ -195,9 +176,7 @@ int main() {
     // Kinematic MVA training variables
     pm.Push<Hist1D>(Axis(80, -4, 4, phi, "#phi", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"phi");
     pm.Push<Hist1D>(Axis(80, -4, 4, "llphoton_psi[0]", "#phi", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"llphoton_phi");
-    pm.Push<Hist1D>(Axis(20, -1, 1, bigTheta, "cos(#Theta)", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"cosTheta");
     pm.Push<Hist1D>(Axis(20, -1, 1, llg_bigTheta, "cos(#Theta)", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"llphoton_cosTheta");
-    pm.Push<Hist1D>(Axis(20, -1, 1, costheta, "cos(#theta)", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"theta");
     pm.Push<Hist1D>(Axis(20, -1, 1, llg_costheta, "cos(#theta)", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"llphoton_theta");
     if(i == 0){
       pm.Push<Hist1D>(Axis(15, 0, 150, "el_pt[ll_i1[0]]", "Leading electron p_{T} [GeV]", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"el1_pt");

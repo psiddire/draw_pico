@@ -113,7 +113,7 @@ Table::Table(const string &name,
     bool do_zbi,
     bool print_table,
     bool print_pie,
-    bool print_titlepie, 
+    bool print_titlepie,
     bool do_eff,
     bool do_unc):
   Figure(),
@@ -194,7 +194,7 @@ vector<GammaParams> Table::Yield(const Process *process, double luminosity) cons
 }
 
 vector<GammaParams> Table::BackgroundYield(double luminosity) const{
-  vector<GammaParams> yields(rows_.size());  
+  vector<GammaParams> yields(rows_.size());
   auto procs = GetProcesses();
   for(const auto &proc: procs){
     if(proc->type_ != Process::Type::background) continue;
@@ -207,7 +207,7 @@ vector<GammaParams> Table::BackgroundYield(double luminosity) const{
 }
 
 vector<GammaParams> Table::DataYield() const{
-  vector<GammaParams> yields(rows_.size());  
+  vector<GammaParams> yields(rows_.size());
   auto procs = GetProcesses();
   for(const auto &proc: procs){
     if(proc->type_ != Process::Type::data) continue;
@@ -317,14 +317,14 @@ void Table::PrintHeader(ofstream &file, double luminosity) const{
     file << " & " <<ToLatex(backgrounds_.front()->process_->name_);
   }
 
-  if(datas_.size() > 1){ 
-    file << " & ";
-    for(size_t i = 0; i < datas_.size(); ++i){
-      file << " & " << ToLatex(datas_.at(i)->process_->name_);
+  for(size_t i = 0; i < datas_.size(); ++i){
+    file << " & " << ToLatex(datas_.at(i)->process_->name_);
+    if(i == datas_.size()-1)
+      file << " & Data Tot.";
+    if(do_zbi_){
+      file << " & $Z_{\\text{Bi}}$";
+      file << " & $\\text{Cowan}$"; // ***NEW LINE***
     }
-    file << " & Data Tot.";
-  }else if(datas_.size() == 1){
-    file << " & " << ToLatex(datas_.front()->process_->name_);
   }
 
   for(size_t i = 0; i < signals_.size(); ++i){
@@ -354,8 +354,8 @@ void Table::PrintRow(ofstream &file, size_t irow, double luminosity) const{
     if(backgrounds_.size() > 1){
       double totyield = luminosity*GetYield(backgrounds_, irow);
       for(size_t i = 0; i < backgrounds_.size(); ++i){
-        if (print_pie_) 
-          file << " & " << luminosity*backgrounds_.at(i)->sumw_.at(irow)/totyield << "$\\pm$" 
+        if (print_pie_)
+          file << " & " << luminosity*backgrounds_.at(i)->sumw_.at(irow)/totyield << "$\\pm$"
             << luminosity*sqrt(backgrounds_.at(i)->sumw2_.at(irow))/totyield;
         // changed these lines for efficiencies
         if (do_eff_){
@@ -390,7 +390,7 @@ void Table::PrintRow(ofstream &file, size_t irow, double luminosity) const{
           if(do_unc_){
             if(eff != eff || eff_relUnc != eff_relUnc)
               file << " & " << setprecision(1) << eff << " $\\pm$ " << eff*eff_relUnc;
-            // 	      file << " & \\num[parse-numbers=false]{" << eff << "}$\\pm$\\num[parse-numbers=false]{" << eff*eff_relUnc << "}"; 
+            // 	      file << " & \\num[parse-numbers=false]{" << eff << "}$\\pm$\\num[parse-numbers=false]{" << eff*eff_relUnc << "}";
             else
               file << " & " << setprecision(1) << eff << " $\\pm$ " << eff*eff_relUnc;
             // 	      file << " & \\num{" << eff << "}$\\pm$\\num{" << eff*eff_relUnc << "}";
@@ -428,7 +428,7 @@ void Table::PrintRow(ofstream &file, size_t irow, double luminosity) const{
       else {
         if (do_unc_) file << " & " << luminosity*signals_.at(i)->sumw_.at(irow) << "$\\pm$"<< luminosity*sqrt(signals_.at(i)->sumw2_.at(irow));
         else file << " & " << luminosity*signals_.at(i)->sumw_.at(irow);
-      // file << " & " << luminosity*signals_.at(i)->sumw_.at(irow) << "$\\pm$" 
+      // file << " & " << luminosity*signals_.at(i)->sumw_.at(irow) << "$\\pm$"
       //         << luminosity*sqrt(signals_.at(i)->sumw2_.at(irow));
       }
       if(do_zbi_){
@@ -543,37 +543,37 @@ void Table::PrintPie(std::size_t irow, double luminosity) const{
 
 
 void Table::PrintFooter(ofstream &file) const{
-  file << "    \\hline\n";
-  file << "    ";
+  // file << "    \\hline\n";
+  // file << "    ";
 
-  if(backgrounds_.size() > 1){
-    for(size_t i = 0; i < backgrounds_.size(); ++i){
-      file << " & " << ToLatex(backgrounds_.at(i)->process_->name_);
-    }
-    file << " & SM Bkg.";
-  }else if(backgrounds_.size() == 1){
-    file << " & " << ToLatex(backgrounds_.front()->process_->name_);
-  }
+  // if(backgrounds_.size() > 1){
+  //   for(size_t i = 0; i < backgrounds_.size(); ++i){
+  //     file << " & " << ToLatex(backgrounds_.at(i)->process_->name_);
+  //   }
+  //   file << " & SM Bkg.";
+  // }else if(backgrounds_.size() == 1){
+  //   file << " & " << ToLatex(backgrounds_.front()->process_->name_);
+  // }
 
-  if(datas_.size() > 1){ 
-    file << " & ";
-    for(size_t i = 0; i < datas_.size(); ++i){
-      file << " & " << ToLatex(datas_.at(i)->process_->name_);
-    }
-    file << " & Data Tot.";
-  }else if(datas_.size() == 1){
-    file << " & " << ToLatex(datas_.front()->process_->name_);
-  }
+  // for(size_t i = 0; i < datas_.size(); ++i){
+  //   file << " & " << ToLatex(datas_.at(i)->process_->name_);
+  //   if(i == datas_.size()-1)
+  //     file << " & Data Tot.";
+  //   if(do_zbi_){
+  //     file << " & $Z_{\\text{Bi}}$";
+  //     file << " & $\\text{Cowan}$"; // ***NEW LINE***
+  //   }
+  // }
 
-  for(size_t i = 0; i < signals_.size(); ++i){
-    file << " & " << ToLatex(signals_.at(i)->process_->name_);
-    if(do_zbi_){
-      file << " & $Z_{\\text{Bi}}$";
-      file << " & $\\text{Cowan}$"; // ***NEW LINE***
-    }
-  }
+  // for(size_t i = 0; i < signals_.size(); ++i){
+  //   file << " & " << ToLatex(signals_.at(i)->process_->name_);
+  //   if(do_zbi_){
+  //     file << " & $Z_{\\text{Bi}}$";
+  //     file << " & $\\text{Cowan}$"; // ***NEW LINE***
+  //   }
+  // }
 
-  file << "\\\\\n";
+  // file << "\\\\\n";
   file << "    \\hline\\hline\n";
   file << "  \\end{tabular}\n";
   file << "\\end{preview}\n";

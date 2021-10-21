@@ -48,7 +48,6 @@ namespace Functions{
   const NamedFunc ntrub("ntrub",[](const Baby &b) -> NamedFunc::ScalarType{
     int tmp_ntrub(0);
     for (unsigned i(0); i<b.jet_pt()->size(); i++){
-      if (!b.jet_h1d()->at(i) && !b.jet_h2d()->at(i)) continue;
       if (b.jet_hflavor()->at(i)==5) tmp_ntrub++;
     }
     return tmp_ntrub;

@@ -32,5 +32,6 @@ namespace ZgUtilities {
   double cos_theta(const Baby &b, bool gen = false);
   double cos_Theta(const Baby &b, bool gen = false);
   double Getphi(const Baby &b, bool gen = false);
+  double KinRefit(const Baby &b);
 }
 #endif

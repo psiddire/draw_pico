@@ -24,27 +24,12 @@
 using namespace std;
 using namespace PlotOptTypes;
 
-bool getDigit(int num, int place) { // Gives the 2^p place in binary number
-  int temp = pow(2,place);
-  return((num%(temp*2) - num%temp)/temp);
-  }
-
 int main(){
   gErrorIgnoreLevel = 6000;
-  string bfolder("/net/cms17/cms17r0/pico/NanoAODv2/");
-  string foldersig(bfolder+"zgamma_signal_ul/2017/signal/unskimmed/*");
-
-  NamedFunc sig_lepid("signal lepton ID",[](const Baby &b) -> NamedFunc::ScalarType{
-    int lepid(0);
-    for(size_t imc(0); imc < b.mc_id()->size(); imc++) {
-      if(b.mc_mom()->at(imc) == 23 && b.mc_mom()->at(b.mc_momidx()->at(imc)) == 25) {
-        lepid = abs(b.mc_id()->at(imc));
-//         if(lepid == 11 || lepid == 13 || lepid == 15)
-          return lepid;
-      }
-    }
-  return lepid;
-  });
+  // string bfolder("/net/cms29/cms29r0/pico/NanoAODv7/");
+  // string foldersig(bfolder+"zgamma_data/2017/data/raw_pico/*");
+  string bfolder("/net/cms29/cms29r0/pico/NanoAODv2/");
+  string foldersig(bfolder+"zgamma_data/2017/data/raw_pico/*");
 
   NamedFunc lepton_sel("lepton_selection",[](const Baby &b) -> NamedFunc::ScalarType{
     if(b.ll_pt()->size() == 0) return false;
@@ -68,43 +53,31 @@ int main(){
     }
     return false;
   });
-  NamedFunc nels("Number of electrons passing the ID",[](const Baby &b) -> NamedFunc::ScalarType{ 
-    int nel(0);
-    for(size_t iel(0); iel < b.el_pt()->size(); iel++) {
-      if(b.el_id()->at(iel)) nel++;
-    }
-    return nel;
-  });
   NamedFunc dilep_mass("m_{ll}",[](const Baby &b) -> NamedFunc::ScalarType{
     double mass(-1);
-    for(int ill(0); ill < b.nll(); ill++) 
+    for(int ill(0); ill < b.nll(); ill++)
       if(mass == -1 || abs(b.ll_m()->at(ill) - 91.1876) < abs(mass - 91.1876))
         mass = b.ll_m()->at(ill);
     return mass;
   });
   NamedFunc photon_cut("photon_cut",[](const Baby &b) -> NamedFunc::ScalarType{
     if(b.photon_pt()->size() == 0) return false;
-    for(size_t iph(0); iph < b.photon_pt()->size(); iph++) 
+    for(size_t iph(0); iph < b.photon_pt()->size(); iph++) {
       if(b.photon_pt()->at(iph) > 15 && b.photon_sig()->at(iph)) return true;
+    }
     return false;
   });
-  NamedFunc wgt("w_lumi",[](const Baby &b) -> NamedFunc::ScalarType{
-    return b.w_lumi();
-  });
-  
-  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
-  NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
-  auto proc_el_sig = Process::MakeShared<Baby_pico>("Sig e",  Process::Type::signal,     kMagenta-4, {foldersig+"*.root"}, sig_lepid == 11);
-  auto proc_mu_sig = Process::MakeShared<Baby_pico>("Sig #mu",Process::Type::signal,     kAzure,     {foldersig+"*.root"}, sig_lepid == 13);
-												
   NamedFunc llphoton_cuts("three body invariant mass cuts",[](const Baby &b) -> NamedFunc::ScalarType{
     bool llp_cuts(false);
     double mllp(0), mll(0), gpt(0);
     int best_ill(0);
     double min_dm(999);
-    for(size_t ill(0); ill < b.ll_pt()->size(); ill++)
-      if(fabs(b.ll_m()->at(ill) - 91.2) < min_dm)
+    for(size_t ill(0); ill < b.ll_pt()->size(); ill++) {
+      if(fabs(b.ll_m()->at(ill) - 91.2) < min_dm) {
+	min_dm = fabs(b.ll_m()->at(ill) - 91.2);
         best_ill = ill;
+      }
+    }
     for(size_t illp(0); illp < b.llphoton_pt()->size(); illp++) {
       mllp = b.llphoton_m()->at(illp);
       mll  = b.ll_m()->at(b.llphoton_ill()->at(illp));
@@ -118,13 +91,18 @@ int main(){
     return llp_cuts;
   });
 
+  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
+  NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
+  auto proc_el_sig = Process::MakeShared<Baby_pico>("Sig e",  Process::Type::data, kBlack, {foldersig+"raw_pico_DoubleEG*.root"}, "1");
+  auto proc_mu_sig = Process::MakeShared<Baby_pico>("Sig #mu",Process::Type::data, kBlack, {foldersig+"raw_pico_DoubleMuon*.root"}, "1");
+
   vector<shared_ptr<Process> > samples  = {proc_el_sig, proc_mu_sig};
 
   vector<NamedFunc> cuts = {"1",
                             el_trigs || mu_trigs,
-                            "nel>1 || nmu>1",
+			    lepton_sel,
                             dilep_mass > 50,
-                            "nphoton > 0",
+			    photon_cut,
                             llphoton_cuts};
   vector<NamedFunc> cutflow;
 
@@ -142,14 +120,14 @@ int main(){
   PlotOpt lin_lumi = log_lumi().YAxis(YAxisType::linear);
   vector<PlotOpt> ops = {log_lumi, lin_lumi};
   PlotMaker pm;
-  pm.Push<Table>("AN_sig_cutflow", vector<TableRow>{
-      TableRow("Total number of events",                cutflow.at(0),0,0,wgt),
-	    TableRow("High level trigger",                    cutflow.at(1),0,0,wgt),
-	    TableRow("lepton selections",                     cutflow.at(2),0,0,wgt),
-	    TableRow("$m_{ll} > $ 50 GeV",                    cutflow.at(3),0,0,wgt),
-	    TableRow("photon ID",                             cutflow.at(4),0,0,wgt),
-	    TableRow("three body invariant mass related cut", cutflow.at(5),0,0,wgt),
-	    },samples,false);
+  pm.Push<Table>("AN_data_cutflow", vector<TableRow>{
+      TableRow("Total number of events",                cutflow.at(0),0,0,1),
+      TableRow("High level trigger",                    cutflow.at(1),0,0,1),
+      TableRow("lepton selections",                     cutflow.at(2),0,0,1),
+      TableRow("$m_{ll} > $ 50 GeV",                    cutflow.at(3),0,0,1),
+      TableRow("photon ID",                             cutflow.at(4),0,0,1),
+      TableRow("three body invariant mass related cut", cutflow.at(5),0,0,1),
+      },samples,false);
   pm.min_print_ = true;
   pm.MakePlots(41.5);
 }
