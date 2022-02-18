@@ -49,10 +49,17 @@ float dR(float eta1, float eta2, float phi1, float phi2) {
 
 int main(){
   gErrorIgnoreLevel = 6000;
-  string bfolder("/net/cms29/cms29r0/pico/NanoAODv2/");
-  string foldersig(bfolder+"zgamma_data/2017/data/raw_pico/*");
-  // string bfolder("/net/cms29/cms29r0/pico/NanoAODv7/");
-  // string foldersig(bfolder+"zgamma_data/2017/data/raw_pico/*");
+  string bfolder("/net/cms17/cms17r0/pico/NanoAODv2/");
+  string foldersig(bfolder+"zgamma_gg/2017/gg/unskimmed/*");
+
+  NamedFunc sig_lepid("signal lepton ID",[](const Baby &b) -> NamedFunc::ScalarType{
+      int l1idx(1);
+      if(b.nel() > 0)
+	l1idx = 2;
+      else if(b.nmu() > 0)
+	l1idx = 3;
+      return l1idx;
+    });
 
   NamedFunc llphoton_cuts("three body invariant mass cuts",[](const Baby &b) -> NamedFunc::VectorType{
     vector<double> llphoton_cuts_;
@@ -141,13 +148,13 @@ int main(){
 
   NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
   NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
-  auto proc_el_sig = Process::MakeShared<Baby_pico>("Sig e",  Process::Type::data, kBlack, {foldersig+"*DoubleEG*.root"}, "1");
-  auto proc_mu_sig = Process::MakeShared<Baby_pico>("Sig #mu",Process::Type::data, kBlack, {foldersig+"*DoubleMuon*.root"}, "1");
+  auto proc_el_sig = Process::MakeShared<Baby_pico>("Electron Channel",  Process::Type::signal, kMagenta-4, {foldersig+"*.root"}, (sig_lepid == 1 || sig_lepid == 2));
+  auto proc_mu_sig = Process::MakeShared<Baby_pico>("Muon Channel",  Process::Type::signal, kMagenta-4, {foldersig+"*.root"}, (sig_lepid == 1 || sig_lepid == 3));
 
   vector<shared_ptr<Process> > samples  = {proc_el_sig, proc_mu_sig};
 
   vector<NamedFunc> cutflow;
-  cutflow.push_back("1");
+  // cutflow.push_back("1");
   cutflow.push_back((el_trigs || mu_trigs));
   cutflow.push_back((el_trigs || mu_trigs) && llphoton_cuts[0.] > 0.0);
   cutflow.push_back((el_trigs || mu_trigs) && llphoton_cuts[1] > 0.0);
@@ -163,13 +170,13 @@ int main(){
   PlotOpt lin_lumi = log_lumi().YAxis(YAxisType::linear);
   vector<PlotOpt> ops = {log_lumi, lin_lumi};
   PlotMaker pm;
-  pm.Push<Table>("AN_data_cuts_cutflow", vector<TableRow>{
-      TableRow("Total number of events",                cutflow.at(0),0,0,wgt),
-      TableRow("High level trigger",                    cutflow.at(1),0,0,wgt),
-      TableRow("lepton selections",                     cutflow.at(2),0,0,wgt),
-      TableRow("$m_{ll} > $ 50 GeV",                    cutflow.at(3),0,0,wgt),
-      TableRow("photon ID",                             cutflow.at(4),0,0,wgt),
-      TableRow("three body invariant mass related cut", cutflow.at(5),0,0,wgt),
+  pm.Push<Table>("AN_hgg_cutflow", vector<TableRow>{
+      // TableRow("Total number of events",                cutflow.at(0),0,0,wgt),
+      TableRow("High level trigger",                    cutflow.at(0),0,0,wgt),
+      TableRow("lepton selections",                     cutflow.at(1),0,0,wgt),
+      TableRow("$m_{ll} > $ 50 GeV",                    cutflow.at(2),0,0,wgt),
+      TableRow("photon ID",                             cutflow.at(3),0,0,wgt),
+      TableRow("three body invariant mass related cut", cutflow.at(4),0,0,wgt),
       },samples,false);
   pm.min_print_ = true;
   pm.MakePlots(41.5);

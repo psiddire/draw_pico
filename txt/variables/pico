@@ -33,6 +33,9 @@ std::vector<float> llphoton_pt
 std::vector<float> llphoton_eta
 std::vector<float> llphoton_phi
 std::vector<float> llphoton_m
+std::vector<float> llphoton_dml1
+std::vector<float> llphoton_dml2
+std::vector<float> llphoton_dmph
 std::vector<float> llphoton_dr
 std::vector<float> llphoton_dphi
 std::vector<float> llphoton_deta
@@ -107,6 +110,9 @@ std::vector<float> el_eta
 std::vector<float> el_etasc
 std::vector<float> el_phi
 std::vector<float> el_energyErr
+std::vector<float> el_etPt
+std::vector<float> el_eminusp
+std::vector<int>   el_phidx
 std::vector<float> el_miniso
 std::vector<float> el_reliso
 std::vector<float> el_dz

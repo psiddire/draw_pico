@@ -228,20 +228,20 @@ void Hist2D::MakeOnePlot(const string &subdir){
 
   bkg_hist.Draw("axis");
   if(bkg_is_hist){
-    bkg_hist.Draw("BOX same");
+    bkg_hist.Draw("COLZ"); // "BOX same"
   }else{
     for(auto &g: bkg_graphs){
-      g.Draw("p");
+      g.Draw("COLZ"); // "p"
     }
   }
   for(auto &l: lines){
     l.Draw();
   }
   for(auto &g: data_graphs){
-    g.Draw("p");
+    g.Draw("COLZ"); // "p"
   }
   for(auto &g: sig_graphs){
-    g.Draw("p");
+    g.Draw("COLZ"); // "p"
   }
   // for(auto &l: labels){
   //   l->Draw("same");

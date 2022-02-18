@@ -26,13 +26,19 @@ using namespace PlotOptTypes;
 
 int main(){
   gErrorIgnoreLevel = 6000;
-  // string bfolder("/net/cms29/cms29r0/pico/NanoAODv7/");
-  // string foldersig(bfolder+"zgamma_data/2017/data/raw_pico/*");
-  string bfolder("/net/cms29/cms29r0/pico/NanoAODv2/");
-  string foldersig(bfolder+"zgamma_data/2017/data/raw_pico/*");
+  string bfolder("/net/cms17/cms17r0/pico/NanoAODv2/");
+  string foldersig(bfolder+"zgamma_data/2018/data/raw_pico/*");
 
-  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
-  NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
+  // 2016
+  // NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
+  // NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ");
+  // 2017
+  // NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
+  // NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
+  // 2018
+  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
+  NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8");
+
   NamedFunc trigs(el_trigs || mu_trigs);
   NamedFunc baseline("nphoton > 0 && nll > 0");
   NamedFunc lepton_cut("(ll_lepid[llphoton_ill[0]] == 13 && mu_pt[ll_i1[llphoton_ill[0]]] > 20 && mu_pt[ll_i2[llphoton_ill[0]]] > 10) || (ll_lepid[llphoton_ill[0]] == 11 && el_pt[ll_i1[llphoton_ill[0]]] > 25 && el_pt[ll_i2[llphoton_ill[0]]] > 15)");
@@ -41,7 +47,7 @@ int main(){
   NamedFunc llphoton_cuts("llphoton_m[0]+ll_m[llphoton_ill[0]] >= 185 && llphoton_m[0] > 100 && llphoton_m[0] < 180 && photon_pt[llphoton_iph[0]]/llphoton_m[0] >= 15./110");
 
   auto proc_el_sig = Process::MakeShared<Baby_pico>("Sig e",  Process::Type::data, kBlack, {foldersig+"raw_pico_DoubleEG*.root"}, "1");
-  auto proc_mu_sig = Process::MakeShared<Baby_pico>("Sig #mu",Process::Type::data, kBlack, {foldersig+"raw_pico_DoubleMuon*.root"}, "1");
+  auto proc_mu_sig = Process::MakeShared<Baby_pico>("{\rm Sig}\ #mu",Process::Type::data, kBlack, {foldersig+"raw_pico_DoubleMuon*.root"}, "1");
   vector<shared_ptr<Process> > samples  = {proc_el_sig, proc_mu_sig};
 
   vector<NamedFunc> cuts = {"1",

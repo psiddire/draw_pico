@@ -34,22 +34,37 @@ int main() {
       double mZ_fit = KinRefit(b);
       return mZ_fit;
     });
+  NamedFunc kinFitH("kinFitH", [](const Baby &b) -> NamedFunc::ScalarType{
+      std::vector<TLorentzVector> reFit = RefitP4(b);
+      TLorentzVector H = reFit[0] + reFit[1] + AssignGamma(b);
+      return H.M();
+    });
   NamedFunc wgt("weight",[](const Baby &b) -> NamedFunc::ScalarType{
       double weight = b.w_lumi();
       return weight*100;
     });
 
-  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
+  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
   NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
   NamedFunc trigs(el_trigs || mu_trigs);
-  NamedFunc mass_cuts("ll_m[0] > 50 && llphoton_m[0]+ll_m[0]>=185 && llphoton_m[0] > 100 && llphoton_m[0] < 180 && photon_pt[0]/llphoton_m[0] >= 15./110");
+  NamedFunc mass_cuts("ll_m[llphoton_ill[0]] > 50 && "
+		      "llphoton_m[0]+ll_m[llphoton_ill[0]]>=185 && "
+		      "llphoton_m[0] > 100 && llphoton_m[0] < 180 && "
+		      "photon_pt[llphoton_iph[0]]/llphoton_m[0] >= 15./110");
   NamedFunc baseline("nphoton > 0 && nll > 0");
-  vector<NamedFunc> lep = {"ll_lepid[0] == 11 && el_pt[ll_i1[0]] > 25 && el_pt[ll_i2[0]] > 15 && "
-			   "el_sig[ll_i1[0]] && el_sig[ll_i2[0]]",
-                           "ll_lepid[0] == 13 && mu_pt[ll_i1[0]] > 20 && mu_pt[ll_i2[0]] > 10 && "
-			   "mu_sig[ll_i1[0]] && mu_sig[ll_i2[0]]"};
-  NamedFunc pho("photon_pt[0] > 15 && photon_drmin[0] > 0.4 && photon_sig[0]");
-
+  vector<NamedFunc> lep = {"ll_lepid[llphoton_ill[0]] == 11 && "
+			   "el_pt[ll_i1[llphoton_ill[0]]] > 25 && "
+			   "el_pt[ll_i2[llphoton_ill[0]]] > 15 && "
+			   "el_sig[ll_i1[llphoton_ill[0]]] && "
+			   "el_sig[ll_i2[llphoton_ill[0]]]",
+                           "ll_lepid[llphoton_ill[0]] == 13 && "
+			   "mu_pt[ll_i1[llphoton_ill[0]]] > 20 && "
+			   "mu_pt[ll_i2[llphoton_ill[0]]] > 10 && "
+			   "mu_sig[ll_i1[llphoton_ill[0]]] && "
+			   "mu_sig[ll_i2[llphoton_ill[0]]]"};
+  NamedFunc pho("photon_pt[llphoton_iph[0]] > 15 && "
+		"photon_drmin[llphoton_iph[0]] > 0.4 && "
+		"photon_sig[llphoton_iph[0]]");
 
   PlotOpt log_lumi("txt/plot_styles.txt","CMSPaper");
   log_lumi.Title(TitleType::info)
@@ -70,20 +85,26 @@ int main() {
   PlotOpt log_stack = log_lumi().Stack(StackType::signal_overlay);
   vector<PlotOpt> ops = {lin_stack};
 
-  auto proc_UL     = Process::MakeShared<Baby_pico>("HToZ#gamma (UL)", sig, 
-                      TColor::GetColor("#ff0000"), {ul_path+"*.root"}, trigs);
+  auto proc_Red     = Process::MakeShared<Baby_pico>("HToZ#gamma (UL)", sig, 
+						     TColor::GetColor("#ff0000"), {ul_path+"*.root"}, trigs);
 
-  proc_UL->SetLineWidth(3);
+  auto proc_Blue    = Process::MakeShared<Baby_pico>("HToZ#gamma (UL)", sig,
+						     TColor::GetColor("#0000ff"), {ul_path+"*.root"}, trigs);
 
-  vector<shared_ptr<Process>> procs = {proc_UL};
+  proc_Red->SetLineWidth(3);
+  proc_Blue->SetLineWidth(3);
+
+  vector<shared_ptr<Process>> procs_Red = {proc_Red};
+  vector<shared_ptr<Process>> procs_Blue = {proc_Blue};
 
   PlotMaker pm;
   string lepName[2] = {"el/", "mu/"};
   for(int i(0); i < 2; i++) {
     NamedFunc selection = baseline && lep.at(i) && pho && mass_cuts;
-    pm.Push<Hist1D>(Axis(20, 100, 180, "llphoton_m[0]", "m_{ll#gamma} [GeV]", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"llphoton_m");
-    pm.Push<Hist1D>(Axis(20, 50, 150, "ll_m[0]", "m_{ll} [GeV]", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"ll_m");
-    pm.Push<Hist1D>(Axis(20, 50, 150, kinFit, "m_{ll} [GeV]", {}), selection, procs, ops).Weight(wgt).Tag(lepName[i]+"ll_m_Refit");
+    pm.Push<Hist1D>(Axis(80, 100, 180, "llphoton_m[0]", "m_{ll#gamma} [GeV]", {}), selection, procs_Red, ops).Weight(wgt).Tag(lepName[i]+"llphoton_m");
+    pm.Push<Hist1D>(Axis(100, 50, 150, "ll_m[llphoton_ill[0]]", "m_{ll} [GeV]", {}), selection, procs_Red, ops).Weight(wgt).Tag(lepName[i]+"ll_m");
+    pm.Push<Hist1D>(Axis(80, 100, 180, kinFitH, "m_{ll#gamma} [GeV]", {}), selection, procs_Blue, ops).Weight(wgt).Tag(lepName[i]+"llphoton_m_Refit");
+    pm.Push<Hist1D>(Axis(100, 50, 150, kinFit, "m_{ll} [GeV]", {}), selection, procs_Blue, ops).Weight(wgt).Tag(lepName[i]+"ll_m_Refit");
   }
   pm.min_print_ = true;
   pm.multithreaded_ = false;

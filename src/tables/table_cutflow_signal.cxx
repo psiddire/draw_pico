@@ -49,10 +49,10 @@ float dR(float eta1, float eta2, float phi1, float phi2) {
 
 int main(){
   gErrorIgnoreLevel = 6000;
-  string bfolder("/net/cms17/cms17r0/pico/NanoAODv7/");
-  string foldersig(bfolder+"zgamma_signal/2017/signal/unskimmed/*");
-  // string bfolder("/net/cms17/cms17r0/pico/NanoAODv2/");
-  // string foldersig(bfolder+"zgamma_signal_ul/2017/signal/unskimmed/*");
+  // string bfolder("/net/cms17/cms17r0/pico/NanoAODv7/");
+  // string foldersig(bfolder+"zgamma_signal/2017/signal/unskimmed/*");
+  string bfolder("/net/cms17/cms17r0/pico/NanoAODv2/");
+  string foldersig(bfolder+"zgamma_signal_ul/2017/signal/unskimmed/*");
 
   NamedFunc sig_lepid("signal lepton ID",[](const Baby &b) -> NamedFunc::ScalarType{
     int lepid(0);
@@ -151,10 +151,10 @@ int main(){
     return b.w_lumi();
   });
 
-  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ || HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL");
+  NamedFunc el_trigs("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
   NamedFunc mu_trigs("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8");
   auto proc_el_sig = Process::MakeShared<Baby_pico>("Sig e",  Process::Type::signal,     kMagenta-4, {foldersig+"*.root"}, sig_lepid == 11);
-  auto proc_mu_sig = Process::MakeShared<Baby_pico>("Sig #mu",Process::Type::signal,     kAzure,     {foldersig+"*.root"}, sig_lepid == 13);
+  auto proc_mu_sig = Process::MakeShared<Baby_pico>("#rm{Sig}#; #mu",Process::Type::signal,     kAzure,     {foldersig+"*.root"}, sig_lepid == 13);
 
   vector<shared_ptr<Process> > samples  = {proc_el_sig, proc_mu_sig};
 
